@@ -6,6 +6,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Home from './pages/Home'
 import CreateDocument from './pages/CreateDocument'
+import EditDocument from './pages/EditDocument';
 
 
 
@@ -20,6 +21,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/create" element={<CreateDocument />} />
+        <Route path="/edit/:id" element={<EditDocument />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,
