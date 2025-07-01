@@ -1,8 +1,11 @@
 import { useState } from "react";
 import axios from "../api/axios";
 import { useNavigate } from "react-router-dom";
+import { Input, Button, Typography, message, Card } from "antd";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+
+const { Title } = Typography;
 
 export default function CreateDocument() {
   const [title, setTitle] = useState("");
@@ -10,42 +13,66 @@ export default function CreateDocument() {
   const navigate = useNavigate();
 
   const handleSave = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      await axios.post("/documents", {
-  title,
-  content,
-}, {
-  headers: {
-    Authorization: `Bearer ${token}`, 
-  },
-});
+    const token = localStorage.getItem("token");
 
-      navigate("/");
+    if (!title.trim() || !content.trim()) {
+      message.warning("Title and content are required.");
+      return;
+    }
+
+    try {
+      await axios.post(
+        "/documents",
+        { title, content },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      message.success("Document created!");
+      navigate("/", { replace: true });
+      window.location.reload(); // force fetch on Home
     } catch (err) {
-      console.error("Failed to save document:", err); // ESLint: using err now
-      alert("Failed to save document");
+      console.error("Failed to save document:", err);
+      message.error("Failed to create document.");
     }
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl mb-4">📝 Create New Document</h1>
-      <input
-        type="text"
-        placeholder="Document Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        className="w-full border px-4 py-2 mb-4"
-      />
-      <ReactQuill value={content} onChange={setContent} className="mb-4" />
-      <button
-        onClick={handleSave}
-        disabled={!title.trim() || !content.trim()}
-        className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
-      >
-        💾 Save
-      </button>
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+      <Card className="w-full max-w-3xl p-6 rounded-xl shadow-lg">
+        <Title level={2} className="text-center text-blue-600 mb-6">
+          📝 Create New Document
+        </Title>
+
+        <Input
+          placeholder="Enter document title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          size="large"
+          className="mb-4"
+        />
+
+        <ReactQuill
+          theme="snow"
+          value={content}
+          onChange={setContent}
+          className="mb-6"
+          style={{ height: 200 }}
+        />
+
+        <Button
+          type="primary"
+          block
+          size="large"
+          onClick={handleSave}
+          disabled={!title.trim() || !content.trim()}
+        >
+          💾 Save Document
+        </Button>
+      </Card>
     </div>
   );
 }

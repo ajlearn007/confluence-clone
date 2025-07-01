@@ -7,6 +7,7 @@ import Register from './pages/Register'
 import Home from './pages/Home'
 import CreateDocument from './pages/CreateDocument'
 import EditDocument from './pages/EditDocument';
+import 'antd/dist/reset.css'; // Add this once globally
 
 
 

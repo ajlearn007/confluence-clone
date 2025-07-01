@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "../api/axios";
+import { Input, Button, Typography, message, Card } from "antd";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+
+const { Title } = Typography;
 
 export default function EditDocument() {
   const navigate = useNavigate();
@@ -12,7 +15,6 @@ export default function EditDocument() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-  // Fetch document on mount
   useEffect(() => {
     const fetchDoc = async () => {
       try {
@@ -22,7 +24,7 @@ export default function EditDocument() {
 
         const doc = res.data.find((d) => d.id === parseInt(id));
         if (!doc) {
-          alert("Document not found or not authorized");
+          message.error("Document not found or unauthorized");
           navigate("/");
           return;
         }
@@ -31,7 +33,7 @@ export default function EditDocument() {
         setContent(doc.content);
       } catch (err) {
         console.error("Failed to fetch document:", err);
-        alert("Error loading document");
+        message.error("Error loading document");
       }
     };
 
@@ -39,6 +41,11 @@ export default function EditDocument() {
   }, [id, token, navigate]);
 
   const handleUpdate = async () => {
+    if (!title.trim() || !content.trim()) {
+      message.warning("Title and content cannot be empty");
+      return;
+    }
+
     try {
       await axios.put(
         `/documents/${id}`,
@@ -47,31 +54,49 @@ export default function EditDocument() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
+
+      message.success("Document updated!");
       navigate("/");
     } catch (err) {
       console.error("Update failed:", err);
-      alert("Failed to update document");
+      message.error("Failed to update document");
     }
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl mb-4">✏️ Edit Document</h1>
-      <input
-        type="text"
-        placeholder="Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        className="w-full border px-4 py-2 mb-4"
-      />
-      <ReactQuill value={content} onChange={setContent} className="mb-4" />
-      <button
-        onClick={handleUpdate}
-        disabled={!title.trim() || !content.trim()}
-        className="bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50"
-      >
-        ✅ Save Changes
-      </button>
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 py-10">
+      <Card className="w-full max-w-4xl p-6 rounded-xl shadow-xl">
+        <Title level={2} className="text-green-700 mb-6 text-center">
+          ✏️ Edit Document
+        </Title>
+
+        <Input
+          placeholder="Document Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          size="large"
+          className="mb-4"
+        />
+
+        <ReactQuill
+          theme="snow"
+          value={content}
+          onChange={setContent}
+          className="mb-6"
+          style={{ height: 200 }}
+        />
+
+        <Button
+          type="primary"
+          size="large"
+          block
+          className="bg-green-600 hover:bg-green-700"
+          onClick={handleUpdate}
+          disabled={!title.trim() || !content.trim()}
+        >
+          ✅ Save Changes
+        </Button>
+      </Card>
     </div>
   );
 }

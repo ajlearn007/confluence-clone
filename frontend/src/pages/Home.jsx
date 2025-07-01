@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../api/axios";
+import { Button, Card, Col, Row, Space, Typography } from "antd";
+
+const { Title, Text } = Typography;
 
 export default function Home() {
   const navigate = useNavigate();
@@ -39,6 +42,7 @@ export default function Home() {
         const res = await axios.get("/documents", {
           headers: { Authorization: `Bearer ${token}` },
         });
+        console.log("Fetched Documents:", res.data); // ✅ Debug log
         setDocuments(res.data);
       } catch (err) {
         console.error("Failed to fetch documents", err);
@@ -50,65 +54,57 @@ export default function Home() {
   }, [token, navigate]);
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl mb-4">📚 Knowledge Base Home</h1>
-      <p>Welcome! You're logged in.</p>
-
-      <div className="flex gap-4 mt-6 mb-4">
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-          onClick={() => navigate("/create")}
-        >
-          ➕ Create Document
-        </button>
-        <button
-          className="bg-red-500 text-white px-4 py-2 rounded"
-          onClick={handleLogout}
-        >
-          🔓 Logout
-        </button>
-      </div>
-
-      {/* 🗂️ Document List */}
-      {documents.length > 0 ? (
-        <div className="grid gap-4">
-          {documents.map((doc) => (
-            <div
-              key={doc.id}
-              className="border p-4 rounded shadow hover:bg-gray-50 transition"
-            >
-              <h2 className="text-xl font-semibold">
-                {doc.title || "Untitled"}
-              </h2>
-              <p
-                className="text-sm text-gray-500"
-                dangerouslySetInnerHTML={{
-                  __html: doc.content.substring(0, 100) + "...",
-                }}
-              />
-              <p className="text-xs mt-2 text-gray-400">
-                Created at: {new Date(doc.created_at).toLocaleString()}
-              </p>
-              <div className="mt-3 flex gap-3">
-                <button
-                  className="text-blue-600 hover:underline"
-                  onClick={() => navigate(`/edit/${doc.id}`)}
-                >
-                  ✏️ Edit
-                </button>
-                <button
-                  className="text-red-600 hover:underline"
-                  onClick={() => handleDelete(doc.id)}
-                >
-                  🗑️ Delete
-                </button>
-              </div>
-            </div>
-          ))}
+    <div className="min-h-screen px-6 py-10 bg-gray-50">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <Title level={2} className="!mb-0 text-blue-600">
+            📚 Knowledge Base
+          </Title>
+          <Space>
+            <Button type="primary" onClick={() => navigate("/create")}>
+              ➕ Create
+            </Button>
+            <Button type="default" danger onClick={handleLogout}>
+              🔓 Logout
+            </Button>
+          </Space>
         </div>
-      ) : (
-        <p>No documents found.</p>
-      )}
+
+        {documents.length > 0 ? (
+          <Row gutter={[16, 16]}>
+            {documents.map((doc) => (
+              <Col key={doc.id} xs={24} sm={12} md={8} lg={6}>
+                <Card
+                  title={doc.title || "Untitled"}
+                  extra={
+                    <Space>
+                      <Button type="link" onClick={() => navigate(`/edit/${doc.id}`)}>
+                        ✏️ Edit
+                      </Button>
+                      <Button type="link" danger onClick={() => handleDelete(doc.id)}>
+                        🗑️ Delete
+                      </Button>
+                    </Space>
+                  }
+                  style={{ borderRadius: 16, minHeight: 250 }}
+                >
+                  <div
+                    className="text-gray-600 text-sm"
+                    dangerouslySetInnerHTML={{
+                      __html: doc.content?.substring(0, 150) || "<i>No preview</i>",
+                    }}
+                  />
+                  <Text type="secondary" className="text-xs block mt-2">
+                    Created at: {new Date(doc.created_at).toLocaleString()}
+                  </Text>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        ) : (
+          <p className="text-gray-500 text-center">No documents found.</p>
+        )}
+      </div>
     </div>
   );
 }
