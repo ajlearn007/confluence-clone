@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "../api/axios";
-import { Input, Button, Typography, message, Card } from "antd";
+import { Input, Button, Typography, message, Card, Select } from "antd";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
 const { Title } = Typography;
+const { Option } = Select;
 
 export default function EditDocument() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function EditDocument() {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [visibility, setVisibility] = useState("private");
 
   useEffect(() => {
     const fetchDoc = async () => {
@@ -31,6 +33,7 @@ export default function EditDocument() {
 
         setTitle(doc.title);
         setContent(doc.content);
+        setVisibility(doc.visibility || "private"); // fallback
       } catch (err) {
         console.error("Failed to fetch document:", err);
         message.error("Error loading document");
@@ -49,7 +52,7 @@ export default function EditDocument() {
     try {
       await axios.put(
         `/documents/${id}`,
-        { title, content },
+        { title, content, visibility },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -85,6 +88,16 @@ export default function EditDocument() {
           className="mb-6"
           style={{ height: 200 }}
         />
+
+        <Select
+          value={visibility}
+          onChange={setVisibility}
+          size="large"
+          className="mb-6 w-full"
+        >
+          <Option value="private">🔒 Private</Option>
+          <Option value="public">🌐 Public</Option>
+        </Select>
 
         <Button
           type="primary"

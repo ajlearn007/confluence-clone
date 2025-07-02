@@ -1,15 +1,17 @@
 import { useState } from "react";
 import axios from "../api/axios";
 import { useNavigate } from "react-router-dom";
-import { Input, Button, Typography, message, Card } from "antd";
+import { Input, Button, Typography, message, Card, Select } from "antd";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
 const { Title } = Typography;
+const { Option } = Select;
 
 export default function CreateDocument() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [visibility, setVisibility] = useState("private"); // default value
   const navigate = useNavigate();
 
   const handleSave = async () => {
@@ -23,7 +25,7 @@ export default function CreateDocument() {
     try {
       await axios.post(
         "/documents",
-        { title, content },
+        { title, content, visibility },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -62,6 +64,16 @@ export default function CreateDocument() {
           className="mb-6"
           style={{ height: 200 }}
         />
+
+        <Select
+          value={visibility}
+          onChange={(value) => setVisibility(value)}
+          size="large"
+          className="mb-6 w-full"
+        >
+          <Option value="private">🔒 Private</Option>
+          <Option value="public">🌐 Public</Option>
+        </Select>
 
         <Button
           type="primary"

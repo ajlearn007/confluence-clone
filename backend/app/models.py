@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
@@ -11,9 +11,8 @@ class User(Base):
     username = Column(String, unique=True)
     hashed_password = Column(String)
 
-    # Add this if you want reverse relationship (optional)
     documents = relationship("Document", back_populates="author")
-
+    shared_documents = relationship("DocumentShare", back_populates="user")
 
 class Document(Base):
     __tablename__ = "documents"
@@ -26,3 +25,17 @@ class Document(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     author = relationship("User", back_populates="documents")
+    shares = relationship("DocumentShare", back_populates="document", cascade="all, delete-orphan")
+    # models.py (Document class)
+    visibility = Column(String, default="private")  # can be "public" or "private"
+
+class DocumentShare(Base):
+    __tablename__ = "document_shares"
+
+    id = Column(Integer, primary_key=True, index=True)
+    document_id = Column(Integer, ForeignKey("documents.id"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    can_edit = Column(Boolean, default=False)
+
+    document = relationship("Document", back_populates="shares")
+    user = relationship("User", back_populates="shared_documents")
