@@ -43,8 +43,23 @@ A full-stack **Confluence-like** collaborative knowledge base platform built usi
 ---
 
 ## 📸 Screenshots
+![image](https://github.com/user-attachments/assets/ea6291ab-c7c1-455a-89cf-ef30cadb5291)
+Login
 
-> *You can add screenshots or a demo GIF here to visually showcase the UI/UX.*
+![image](https://github.com/user-attachments/assets/e4b9b350-671c-4788-b4a5-6bda2e1e5e1a)
+Register
+
+![image](https://github.com/user-attachments/assets/5ae1d4ea-b10a-475f-9c14-85463049746d)
+Home
+
+![image](https://github.com/user-attachments/assets/656e565c-140d-4e7e-9d5a-151dfef4e5aa)
+Create Document
+
+![image](https://github.com/user-attachments/assets/62df8766-18e7-4776-8267-de404e286e8d)
+Edit Document
+
+
+
 
 ---
 
