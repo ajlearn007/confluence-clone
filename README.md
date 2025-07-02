@@ -81,27 +81,27 @@ frontend/
 │   └── api/axios.js
 
 
-##🧰 Setup Instructions
-#Backend (FastAPI)
+## 🧰 Setup Instructions
+# Backend (FastAPI)
 cd backend
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 
-#Frontend (React + Vite)
+# Frontend (React + Vite)
 cd frontend
 npm install
 npm run dev
 
-##🔐 Environment Variables
-#Create a .env file in backend/ with:
+## 🔐 Environment Variables
+# Create a .env file in backend/ with:
 DATABASE_URL=postgresql://<username>:<password>@localhost/<db_name>
 SECRET_KEY=your-secret-key
 ALGORITHM=HS256
 
 
-##📹 Demo Video
+## 📹 Demo Video
 # Loom link : 
 ---
 
