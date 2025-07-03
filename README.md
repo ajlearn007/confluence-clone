@@ -102,7 +102,7 @@ ALGORITHM=HS256
 
 
 ## 📹 Demo Video
-# Loom link : 
+https://drive.google.com/file/d/1d__0kjL8upD4-KrTG7SfZfchjiVAuGRI/view?usp=sharing
 ---
 
 ## 🧪 Demo Credentials
