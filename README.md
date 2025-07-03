@@ -97,6 +97,7 @@ npm run dev
 ## 🔐 Environment Variables
 # Create a .env file in backend/ with:
 DATABASE_URL=postgresql://<username>:<password>@localhost/<db_name>
+
 SECRET_KEY=your-secret-key
 ALGORITHM=HS256
 
