@@ -11,6 +11,7 @@ import {
   Typography,
   message,
   Empty,
+  Modal,
 } from "antd";
 import {
   PlusOutlined,
@@ -18,7 +19,12 @@ import {
   EditOutlined,
   DeleteOutlined,
   SearchOutlined,
+  DownloadOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
+
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 const { Title, Text } = Typography;
 
@@ -27,6 +33,9 @@ export default function Home() {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [documents, setDocuments] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [viewDocument, setViewDocument] = useState(null);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -50,7 +59,31 @@ export default function Home() {
     }
   };
 
-  // ✅ Stable version of fetchDocuments
+  const handleDownload = async (doc) => {
+    const tempDiv = document.createElement("div");
+    tempDiv.style.padding = "20px";
+    tempDiv.style.width = "600px";
+    tempDiv.style.backgroundColor = "white";
+    tempDiv.innerHTML = `
+      <h2>${doc.title || "Untitled"}</h2>
+      <div>${doc.content || "<i>No content</i>"}</div>
+      <p><i>Created at: ${new Date(doc.created_at).toLocaleString()}</i></p>
+    `;
+    document.body.appendChild(tempDiv);
+
+    const canvas = await html2canvas(tempDiv);
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`${doc.title?.replace(/\s+/g, "_") || "document"}.pdf`);
+
+    document.body.removeChild(tempDiv);
+  };
+
   const fetchDocuments = useCallback(
     async (q = "") => {
       try {
@@ -69,7 +102,6 @@ export default function Home() {
     [token]
   );
 
-  // Initial load
   useEffect(() => {
     if (!token) {
       navigate("/login");
@@ -78,7 +110,6 @@ export default function Home() {
     fetchDocuments();
   }, [token, navigate, fetchDocuments]);
 
-  // Debounced search
   useEffect(() => {
     const delay = setTimeout(() => {
       fetchDocuments(searchQuery);
@@ -91,7 +122,7 @@ export default function Home() {
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
           <Title level={2} className="!mb-0 text-blue-600">
-            📚 Anand's knowledge Base
+            📚 Anand's Knowledge Base
           </Title>
           <Space wrap>
             <Input
@@ -102,10 +133,19 @@ export default function Home() {
               style={{ width: 240 }}
               allowClear
             />
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate("/create")}>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => navigate("/create")}
+            >
               Create
             </Button>
-            <Button type="default" danger icon={<LogoutOutlined />} onClick={handleLogout}>
+            <Button
+              type="default"
+              danger
+              icon={<LogoutOutlined />}
+              onClick={handleLogout}
+            >
               Logout
             </Button>
           </Space>
@@ -118,8 +158,13 @@ export default function Home() {
                 <Card
                   title={doc.title || "Untitled"}
                   actions={[
+                    <EyeOutlined key="view" onClick={() => {
+                      setViewDocument(doc);
+                      setViewModalOpen(true);
+                    }} />,
                     <EditOutlined key="edit" onClick={() => navigate(`/edit/${doc.id}`)} />,
                     <DeleteOutlined key="delete" onClick={() => handleDelete(doc.id)} />,
+                    <DownloadOutlined key="download" onClick={() => handleDownload(doc)} />,
                   ]}
                   style={{ borderRadius: 16, minHeight: 260 }}
                 >
@@ -139,6 +184,25 @@ export default function Home() {
         ) : (
           <Empty description="No documents found" className="mt-20" />
         )}
+
+        {/* 📄 Document View Modal */}
+        <Modal
+          title={viewDocument?.title || "Untitled"}
+          open={viewModalOpen}
+          onCancel={() => setViewModalOpen(false)}
+          footer={null}
+          width={800}
+        >
+          <div
+            className="prose max-w-none"
+            dangerouslySetInnerHTML={{
+              __html: viewDocument?.content || "<i>No content available</i>",
+            }}
+          />
+          <Text type="secondary" className="block mt-4">
+            Created at: {viewDocument && new Date(viewDocument.created_at).toLocaleString()}
+          </Text>
+        </Modal>
       </div>
     </div>
   );
